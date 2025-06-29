@@ -1,0 +1,7 @@
+flask==2.0.1
+numpy==1.21.2
+streamlit
+numpy
+matplotlib
+networkx
+pandas
