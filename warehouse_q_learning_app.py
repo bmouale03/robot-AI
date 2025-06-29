@@ -216,8 +216,8 @@ elif option == "Route avec étape intermédiaire":
         else:
             st.warning("Les trois points doivent être différents.")
 
-if st.checkbox("📷 Afficher la photo de l’environnement d’étude"):
-    st.image("photo-entrepot.png", caption="Photo de l’environnement d’étude", use_column_width=True)
+if st.checkbox("Afficher la photo de l’environnement d’étude"):
+    st.image("photo-entrepot.png", caption="Photo de l’environnement d’étude", use_container_width=True)
     st.markdown("""
         <style>
         .zoom-container img:hover {
