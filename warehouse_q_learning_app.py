@@ -257,7 +257,7 @@ elif option == "Route avec étape intermédiaire":
 
 # --- VISUEL ENTREPÔT ---
 if st.checkbox("Afficher la photo de l’environnement d’étude"):
-    st.image("photo-entrepot.png", caption="Photo de l’environnement d’étude", use_column_width=True)
+    st.image("photo-entrepot.png", caption="Photo de l’environnement d’étude",use_container_width=True)
     st.markdown("""
         <style>
         .zoom-container img:hover {
