@@ -160,15 +160,46 @@ def animate_route(route):
 # Interface utilisateur Streamlit
 st.set_page_config(page_title="Optimisation Entrepôt", layout="centered")
 
-st.title("OPTIMISATION DES FLUX DANS UN ENTREPÔT ")
-st.write("Trouvez les itinéraires optimaux dans votre entrepôt à l’aide de l’intelligence artificielle.")
+# --- TITRE PRINCIPAL ---
+st.title("OPTIMISATION DES FLUX DANS UN ENTREPÔT")
+st.subheader("Trajets intelligents grâce à l’apprentissage par renforcement")
 
-option = st.radio("Choisissez une option :", ["Route directe", "Route avec étape intermédiaire"])
+# --- DESCRIPTION DU PROJET (optionnelle) ---
+with st.expander("Description du projet (cliquez pour afficher)"):
+    st.markdown("""
+    Cette application utilise l'intelligence artificielle pour optimiser les déplacements à l'intérieur d'un entrepôt.
+    Elle repose sur un algorithme de **Q-learning** pour apprendre automatiquement les meilleurs itinéraires.
+
+    #### Objectifs :
+    - Réduction du temps de trajet.
+    - Optimisation des parcours entre les zones.
+    - Visualisation dynamique des trajets.
+
+    #### Fonctions principales :
+    - Itinéraires directs ou avec étape intermédiaire.
+    - Estimation du temps selon la vitesse et la distance.
+    - Affichage graphique & animation du chemin.
+    - Enregistrement automatique des trajets.
+
+    > Ce projet est un exemple d’intégration de l’IA dans la logistique intelligente (AGV, robotique, entrepôt automatisé).
+    """)
+
+st.markdown("---")
+
+# --- PARAMÈTRES UTILISATEUR ---
+st.header("Paramètres de simulation")
+col1, col2 = st.columns(2)
+with col1:
+    time_per_step = st.slider("Temps pour une étape (secondes)", 1, 30, 5)
+with col2:
+    robot_speed = st.slider("Vitesse du robot (mètres/seconde)", 0.5, 5.0, 1.0, step=0.1)
+
+distance_per_step = 10  # mètres
+
+# --- CHOIX DE L’ITINÉRAIRE ---
+st.markdown("### Choix de l’itinéraire")
+option = st.radio("Quel type de trajet souhaitez-vous calculer ?", ["Route directe", "Route avec étape intermédiaire"])
 locations = list(location_to_state.keys())
-
-time_per_step = st.slider("Temps estimé pour parcourir une étape (en secondes)", 1, 30, 5)
-robot_speed = st.slider("Vitesse du robot (en mètres/seconde)", 0.5, 5.0, 1.0, step=0.1)
-distance_per_step = 10
 
 if option == "Route directe":
     col1, col2 = st.columns(2)
@@ -177,16 +208,20 @@ if option == "Route directe":
     with col2:
         end = st.selectbox("Point d’arrivée", locations, index=1)
 
-    if st.button("Trouver la route optimale"):
+    if st.button("Calculer la route optimale"):
         if start != end:
             result = route(start, end)
-            st.success(f"Route optimale : {' -> '.join(result)}")
+            st.success(f"✅ Route optimale : **{' → '.join(result)}**")
+
             minutes, seconds, total = calculate_travel_time(result, time_per_step)
-            st.info(f"Temps estimé : {minutes} min {seconds} s ({total} sec)")
+            st.info(f"Temps estimé : **{minutes} min {seconds} s** ({total} sec)")
+
             total_distance = (len(result) - 1) * distance_per_step
             speed_secs = total_distance / robot_speed
-            st.info(f"Temps à {robot_speed} m/s : {int(speed_secs//60)} min {int(speed_secs%60)} s pour {total_distance} m")
-            st.image(draw_route_graph(result))
+            st.info(f"Durée à {robot_speed} m/s : **{int(speed_secs//60)} min {int(speed_secs%60)} s** pour {total_distance} m")
+
+            st.image(draw_route_graph(result), caption="🗺️ Graphe du trajet")
+
             if st.button("Lancer l’animation"):
                 animate_route(result)
         else:
@@ -195,29 +230,34 @@ if option == "Route directe":
 elif option == "Route avec étape intermédiaire":
     col1, col2, col3 = st.columns(3)
     with col1:
-        start = st.selectbox("Point de départ", locations, key="start")
+        start = st.selectbox("Départ", locations, key="start")
     with col2:
-        mid = st.selectbox("Point intermédiaire", locations, key="mid")
+        mid = st.selectbox("⏸Étape intermédiaire", locations, key="mid")
     with col3:
-        end = st.selectbox("Point d’arrivée", locations, key="end")
+        end = st.selectbox("Arrivée", locations, key="end")
 
-    if st.button("Trouver la meilleure route avec étape"):
+    if st.button("Calculer la meilleure route avec étape"):
         if len({start, mid, end}) == 3:
             result = best_route(start, end, mid)
-            st.success(f"Meilleure route via {mid} : {' -> '.join(result)}")
+            st.success(f"✅ Meilleure route via {mid} : **{' → '.join(result)}**")
+
             minutes, seconds, total = calculate_travel_time(result, time_per_step)
-            st.info(f"Temps estimé : {minutes} min {seconds} s ({total} sec)")
+            st.info(f"Temps estimé : **{minutes} min {seconds} s** ({total} sec)")
+
             total_distance = (len(result) - 1) * distance_per_step
             speed_secs = total_distance / robot_speed
-            st.info(f"Temps à {robot_speed} m/s : {int(speed_secs//60)} min {int(speed_secs%60)} s pour {total_distance} m")
-            st.image(draw_route_graph(result))
+            st.info(f"Durée à {robot_speed} m/s : **{int(speed_secs//60)} min {int(speed_secs%60)} s** pour {total_distance} m")
+
+            st.image(draw_route_graph(result), caption="Graphe du trajet")
+
             if st.button("Lancer l’animation"):
                 animate_route(result)
         else:
             st.warning("Les trois points doivent être différents.")
 
+# --- VISUEL ENTREPÔT ---
 if st.checkbox("Afficher la photo de l’environnement d’étude"):
-    st.image("photo-entrepot.png", caption="Photo de l’environnement d’étude", use_container_width=True)
+    st.image("photo-entrepot.png", caption="Photo de l’environnement d’étude", use_column_width=True)
     st.markdown("""
         <style>
         .zoom-container img:hover {
@@ -228,5 +268,6 @@ if st.checkbox("Afficher la photo de l’environnement d’étude"):
     """, unsafe_allow_html=True)
     st.markdown("<p style='font-style: italic; text-align: center;'>Survolez pour zoomer</p>", unsafe_allow_html=True)
 
+# --- PIED DE PAGE ---
 st.markdown("---")
-st.caption("© 2025 - IA réalisée par Dr. MOUALE")
+st.caption("© 2025 - IA développée par Dr. MOUALE")
