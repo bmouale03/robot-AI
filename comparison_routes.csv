@@ -1,0 +1,9 @@
+Méthode,Point de départ,Point d’arrivée,Itinéraire,Nombre d’étapes,Temps total (s)
+2025-07-05 17:36:46,Q-learning,F,E,F -> B -> A -> B -> F -> J -> I -> E,7,35
+2025-07-05 17:36:46,Dijkstra,F,E,F -> B -> A -> B -> F -> J -> I -> E,7,35
+2025-07-05 18:01:09,Q-learning,E,F,E -> I -> J -> F -> B -> A -> B -> F,7,35
+2025-07-05 18:01:09,Dijkstra,E,F,E -> I -> J -> F -> B -> A -> B -> F,7,35
+2025-07-05 18:03:41,Q-learning,C,D,C -> B -> A -> B -> C -> G -> H -> D,7,35
+2025-07-05 18:03:41,Dijkstra,C,D,C -> B -> A -> B -> C -> G -> H -> D,7,35
+2025-07-05 18:07:29,Q-learning,A,F,A -> B -> C -> G -> C -> B -> F,6,30
+2025-07-05 18:07:29,Dijkstra,A,F,A -> B -> C -> G -> C -> B -> F,6,30

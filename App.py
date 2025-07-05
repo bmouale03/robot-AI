@@ -156,69 +156,6 @@ def animate_route(route):
         image_slot.image(buf)
         progress_bar.progress(i / total_steps)
         time.sleep(0.7)
-def dijkstra_route(start, end):
-    G = nx.Graph()
-    edges = [
-        ('A', 'B'), ('B', 'C'), ('B', 'F'), ('C', 'G'),
-        ('F', 'J'), ('G', 'H'), ('H', 'D'), ('H', 'L'),
-        ('J', 'I'), ('J', 'K'), ('K', 'L'), ('I', 'E'),
-    ]
-    G.add_edges_from(edges)
-    shortest_path = nx.shortest_path(G, source=start, target=end)
-    travel_time = calculate_travel_time(shortest_path)
-    save_route_to_csv(start, end, shortest_path, travel_time_seconds=travel_time[2], filename="dijkstra_routes.csv")
-    return shortest_path
-#Dijkstra avec etape intermediaire
-def dijkstra_best_route(start, mid, end):
-    G = nx.Graph()
-    edges = [
-        ('A', 'B'), ('B', 'C'), ('B', 'F'), ('C', 'G'),
-        ('F', 'J'), ('G', 'H'), ('H', 'D'), ('H', 'L'),
-        ('J', 'I'), ('J', 'K'), ('K', 'L'), ('I', 'E'),
-    ]
-    G.add_edges_from(edges)
-
-    path1 = nx.shortest_path(G, source=start, target=mid)
-    path2 = nx.shortest_path(G, source=mid, target=end)[1:]
-    full_path = path1 + path2
-
-    travel_time = calculate_travel_time(full_path)
-    save_route_to_csv(start, end, full_path, travel_time_seconds=travel_time[2], filename="dijkstra_routes.csv")
-    return full_path
-
-def plot_comparison_chart(q_time, d_time):
-    labels = ['Q-learning', 'Dijkstra']
-    values = [q_time, d_time]
-
-    fig, ax = plt.subplots()
-    bars = ax.bar(labels, values, color=['orange', 'skyblue'])
-    ax.set_ylabel("Temps (secondes)")
-    ax.set_title("Comparaison des temps estimés")
-
-    for bar in bars:
-        yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1, f'{int(yval)}s', ha='center', va='bottom', fontsize=10)
-
-    st.pyplot(fig)
-def save_comparison_to_csv(start, end, method, route, travel_time, filename="comparison_routes.csv"):
-    try:
-        with open(filename, 'r'):
-            pass
-    except FileNotFoundError:
-        with open(filename, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([
-                "Timestamp", "Méthode", "Point de départ", "Point d’arrivée",
-                "Trajet", "Nombre d'étapes", "Temps total (s)"
-            ])
-
-    with open(filename, 'a', newline='') as file:
-        writer = csv.writer(file)
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        route_str = " -> ".join(route)
-        writer.writerow([
-            timestamp, method, start, end, route_str, len(route) - 1, travel_time
-        ])
 
 # Interface utilisateur Streamlit
 st.set_page_config(page_title="Optimisation Entrepôt", layout="centered")
@@ -261,8 +198,7 @@ distance_per_step = 10  # mètres
 
 # --- CHOIX DE L’ITINÉRAIRE ---
 st.markdown("### Choix de l’itinéraire")
-option = st.radio("Quel type de trajet souhaitez-vous calculer ?", ["Route directe", "Route avec étape intermédiaire", "Comparer Q-learning vs Dijkstra"])
-
+option = st.radio("Quel type de trajet souhaitez-vous calculer ?", ["Route directe", "Route avec étape intermédiaire"])
 locations = list(location_to_state.keys())
 
 if option == "Route directe":
@@ -318,80 +254,7 @@ elif option == "Route avec étape intermédiaire":
                 animate_route(result)
         else:
             st.warning("Les trois points doivent être différents.")
-            
-elif option == "Comparer Q-learning vs Dijkstra": 
-    col1, col2 = st.columns(2)
-    with col1:
-        start = st.selectbox("Départ", locations, key="comp_start")
-    with col2:
-        end = st.selectbox("Arrivée", locations, key="comp_end")
 
-    if st.button("Comparer les algorithmes"):
-        if start != end:
-            st.subheader("Q-learning")
-            q_route = route(start, end)
-            q_minutes, q_seconds, q_total = calculate_travel_time(q_route, time_per_step)
-            st.success(f"Q-learning : **{' → '.join(q_route)}**")
-            st.info(f"Temps estimé : {q_minutes} min {q_seconds} s")
-            st.image(draw_route_graph(q_route), caption="Trajet Q-learning")
-
-            st.subheader("Dijkstra")
-            d_route = dijkstra_route(start, end)
-            d_minutes, d_seconds, d_total = calculate_travel_time(d_route, time_per_step)
-            st.success(f"Dijkstra : **{' → '.join(d_route)}**")
-            st.info(f"Temps estimé : {d_minutes} min {d_seconds} s")
-            st.image(draw_route_graph(d_route), caption="Trajet Dijkstra")
-
-            if len(q_route) < len(d_route):
-                st.success("Q-learning a trouvé un chemin plus court en nombre d'étapes.")
-            elif len(q_route) > len(d_route):
-                st.info("Dijkstra a trouvé un chemin plus court en nombre d'étapes.")
-            else:
-                st.warning("Les deux algorithmes ont trouvé un chemin de même longueur.")
-        
-        else:
-            st.warning("Le point de départ et d’arrivée doivent être différents.")
-            # Graphe comparatif des durées
-    st.markdown("---")
-    st.markdown("### Comparaison avec étape intermédiaire")
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        start_cmp = st.selectbox("Départ", locations, key="cmp_start")
-    with col2:
-        mid_cmp = st.selectbox("Étape", locations, key="cmp_mid")
-    with col3:
-        end_cmp = st.selectbox("Arrivée", locations, key="cmp_end")
-
-    if st.button("Comparer les deux méthodes avec étape"):
-        if len({start_cmp, mid_cmp, end_cmp}) == 3:
-            st.subheader("Q-learning avec étape")
-            q_route = best_route(start_cmp, end_cmp, mid_cmp)
-            q_minutes, q_seconds, q_total = calculate_travel_time(q_route, time_per_step)
-            st.success(f"Q-learning : **{' → '.join(q_route)}**")
-            st.info(f"Temps estimé : {q_minutes} min {q_seconds} s")
-            st.image(draw_route_graph(q_route), caption="Trajet Q-learning")
-            save_comparison_to_csv(start_cmp, end_cmp, "Q-learning", q_route, q_total)
-
-            st.subheader("Dijkstra avec étape")
-            d_route = dijkstra_best_route(start_cmp, mid_cmp, end_cmp)
-            d_minutes, d_seconds, d_total = calculate_travel_time(d_route, time_per_step)
-            st.success(f"Dijkstra : **{' → '.join(d_route)}**")
-            st.info(f"Temps estimé : {d_minutes} min {d_seconds} s")
-            st.image(draw_route_graph(d_route), caption="Trajet Dijkstra")
-            save_comparison_to_csv(start_cmp, end_cmp, "Dijkstra", d_route, d_total)
-            plot_comparison_chart(q_total, d_total)
-
-            if len(q_route) < len(d_route):
-                st.success("Q-learning a trouvé un chemin plus court.")
-            elif len(q_route) > len(d_route):
-                st.info("Dijkstra a trouvé un chemin plus court.")
-            else:
-                st.warning("Les deux ont trouvé un chemin de même longueur.")
-else:
-    st.warning("Les trois points doivent être différents.")
-    plot_comparison_chart(q_total, d_total)
-             
 # --- VISUEL ENTREPÔT ---
 if st.checkbox("Afficher la photo de l’environnement d’étude"):
     st.image("photo-entrepot.png", caption="Photo de l’environnement d’étude",use_container_width=True)
@@ -404,7 +267,6 @@ if st.checkbox("Afficher la photo de l’environnement d’étude"):
         </style>
     """, unsafe_allow_html=True)
     st.markdown("<p style='font-style: italic; text-align: center;'>Survolez pour zoomer</p>", unsafe_allow_html=True)
-
 
 # --- PIED DE PAGE ---
 st.markdown("---")
