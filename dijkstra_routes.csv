@@ -36,3 +36,4 @@ Timestamp,Start Point,End Point,Optimal Route,Number of Steps,Travel Time (s)
 2025-07-05 18:03:41,C,D,C -> B -> A -> B -> C -> G -> H -> D,7,35
 2025-07-05 18:03:58,D,B,D -> H -> G -> C -> B,4,20
 2025-07-05 18:07:29,A,F,A -> B -> C -> G -> C -> B -> F,6,30
+2025-07-05 18:28:40,C,A,C -> G -> H -> D -> H -> G -> C -> B -> A,8,40

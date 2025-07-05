@@ -388,9 +388,9 @@ elif option == "Comparer Q-learning vs Dijkstra":
                 st.info("Dijkstra a trouvé un chemin plus court.")
             else:
                 st.warning("Les deux ont trouvé un chemin de même longueur.")
-else:
-    st.warning("Les trois points doivent être différents.")
-    plot_comparison_chart(q_total, d_total)
+        else:
+            st.warning("Les trois points doivent être différents.")
+            #plot_comparison_chart(q_total, d_total)
              
 # --- VISUEL ENTREPÔT ---
 if st.checkbox("Afficher la photo de l’environnement d’étude"):

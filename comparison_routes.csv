@@ -7,3 +7,5 @@ Méthode,Point de départ,Point d’arrivée,Itinéraire,Nombre d’étapes,Temps total (
 2025-07-05 18:03:41,Dijkstra,C,D,C -> B -> A -> B -> C -> G -> H -> D,7,35
 2025-07-05 18:07:29,Q-learning,A,F,A -> B -> C -> G -> C -> B -> F,6,30
 2025-07-05 18:07:29,Dijkstra,A,F,A -> B -> C -> G -> C -> B -> F,6,30
+2025-07-05 18:28:40,Q-learning,C,A,C -> G -> H -> D -> H -> G -> C -> B -> A,8,40
+2025-07-05 18:28:40,Dijkstra,C,A,C -> G -> H -> D -> H -> G -> C -> B -> A,8,40
